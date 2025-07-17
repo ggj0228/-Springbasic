@@ -1,12 +1,11 @@
-package com.beyond.basic.b2_bold.controller;
+package com.beyond.basic.b2_bold.Author.controller;
 
-import com.beyond.basic.b2_bold.domain.Author;
-import com.beyond.basic.b2_bold.dto.*;
-import com.beyond.basic.b2_bold.service.AuthorService;
+import com.beyond.basic.b2_bold.Author.dto.*;
+import com.beyond.basic.b2_bold.Author.service.AuthorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -22,7 +21,8 @@ public class AuthorController {
 
     // 회원 가입
     @PostMapping("/create")
-    public ResponseEntity<String> save(@RequestBody AuthorCreateDto authorCreateDto) {
+    // dto에 있는 validationn annotation과 controller에 @Valid 한쌍
+    public ResponseEntity<String> save(@Valid @RequestBody AuthorCreateDto authorCreateDto) {
 //       try {
 //           authorService.save(authorCreateDto);
 //           return  new ResponseEntity<>("ok", HttpStatus.CREATED);

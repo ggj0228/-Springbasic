@@ -1,4 +1,4 @@
-package com.beyond.basic.b2_bold.dto;
+package com.beyond.basic.b2_bold.Author.dto;
 
 
 import lombok.AllArgsConstructor;

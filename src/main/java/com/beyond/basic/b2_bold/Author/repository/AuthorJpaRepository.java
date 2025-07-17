@@ -1,11 +1,10 @@
-package com.beyond.basic.b2_bold.repository;
+package com.beyond.basic.b2_bold.Author.repository;
 
-import com.beyond.basic.b2_bold.domain.Author;
+import com.beyond.basic.b2_bold.Author.domain.Author;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 

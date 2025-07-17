@@ -1,7 +1,7 @@
-package com.beyond.basic.b2_bold.dto;
+package com.beyond.basic.b2_bold.Author.dto;
 
 
-import com.beyond.basic.b2_bold.domain.Author;
+import com.beyond.basic.b2_bold.Author.domain.Author;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
