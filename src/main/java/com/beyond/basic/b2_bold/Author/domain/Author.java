@@ -2,23 +2,27 @@ package com.beyond.basic.b2_bold.Author.domain;
 
 
 import com.beyond.basic.b2_bold.Author.dto.AuthorListDto;
+import com.beyond.basic.b2_bold.Common.BaseTimeEntity;
+import com.beyond.basic.b2_bold.Post.domain.Post;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @NoArgsConstructor
 @Getter
 @AllArgsConstructor
 @ToString
 // JPA를 사용할 경우 Entity를 반드시 붙여야하는 어노테이션
-// JPA으 EntityManager에게 객체를 위임하기 위한 어노테이션
+// JPA의 EntityManager에게 객체를 위임하기 위한 어노테이션
 // EntityManager는 영속성컨텍스트(엔터티의 현재상황)을 통해 db 데이터 관리.
 @Entity
 @Builder
-public class Author {
+public class Author extends BaseTimeEntity   {
     @Id //pk설정(바로 밑에 있는 Entity를)
     // identity: auto_increment
     // auto: id생성 전략을 jpa에게 자동 설정하도록 위임
@@ -30,23 +34,18 @@ public class Author {
     private String email;
     // @Column(name = "pw") : 되도록이면 컬럼명과 변수명을 일치시키는 것이 개발의 혼선을 줄일 수 있음
     private String password;
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING) // DB에 데이터가 들어갈 때 문자열로 저장 (default는 숫자로 0,1,2 .. 로 들어가짐)
     @Builder.Default // 빌더패턴에서 변수 초기화(디폴트값)시 Builder.Default어노테이션 필수
     private Role role = Role.USER;
 
+    // OneToMany는 선택사항, 또한 default가 Lazy
+    // mappedBy에는 ManyToOne 쪽의 변수명을 문자열로 지정. fk관리를 반대편(post) 쪽에서 관리한다는 의미 -> 연관관계주인(fk의 주인) 설정
+    @OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Post> postList  = new ArrayList<>();
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
-    }
-//    public AuthorDetailDto detailFromEntity () {
-//        return new AuthorDetailDto(this.id, this.name, this.password);
-//    }
-    public AuthorListDto listFromEntity () {
-        return new AuthorListDto(this.id, this.name, this.password);
     }
 }

@@ -8,6 +8,8 @@ import com.beyond.basic.b2_bold.Author.dto.AuthorUpdatePwDto;
 //import com.beyond.basic.b2_bold.repository.AuthorJdbcRepository;
 //import com.beyond.basic.b2_bold.repository.AuthorMemoryRepository;
 import com.beyond.basic.b2_bold.Author.repository.AuthorRepository;
+import com.beyond.basic.b2_bold.Post.domain.Post;
+import com.beyond.basic.b2_bold.Post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +39,8 @@ public class AuthorService {
     // 의존성 주입(DI)방법3. RequiredArgs 어노테이션 사용 -> 반드시 초기화 되어야하는 필드(final 등)을 대상으로 생성자를 자동생성
     // 다형성 설계는 불가능
     private final AuthorRepository authorRepository;
+    private final PostRepository postRepository;
+
 
     // 객체조립은 서비스 담당
     public void save(@RequestBody AuthorCreateDto authorCreateDto) {
@@ -53,12 +57,17 @@ public class AuthorService {
     // 트랜잭션이 피료없는 경우, 아래와 같이 명시적으로 제외 (ex. 조회만 있는 경우)
     @Transactional(readOnly = true)
     public List<AuthorListDto> findAll() {
-        return authorRepository.findAll().stream().map(a -> a.listFromEntity()).toList();
+        return authorRepository.findAll().stream().map(a -> AuthorListDto.listfromEntity(a)).toList();
     }
 
     @Transactional(readOnly = true)
     public AuthorDetailDto findById(Long id) {
         Author author = authorRepository.findById(id).orElseThrow(() -> new NoSuchElementException("id not found"));
+//        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
+        // 연관관계없이 직접 조회해서 count값 찾는 경우
+//        List<Post> postList = postRepository.findByAuthor(author);
+//        AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
+        // OneToMany연관관계 설정 후, 직접 조회해서 count값 찾는 경우
         AuthorDetailDto dto = AuthorDetailDto.fromEntity(author);
         return dto;
     }

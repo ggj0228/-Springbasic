@@ -2,6 +2,8 @@ package com.beyond.basic.b2_bold.Author.controller;
 
 import com.beyond.basic.b2_bold.Author.dto.*;
 import com.beyond.basic.b2_bold.Author.service.AuthorService;
+import com.beyond.basic.b2_bold.Common.CommonDto.CommonDto;
+import com.beyond.basic.b2_bold.Common.CommonDto.CommonErrorDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
