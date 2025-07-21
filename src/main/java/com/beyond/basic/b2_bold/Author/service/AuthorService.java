@@ -19,7 +19,8 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @Service // Component 로도 대체 가능(트랜잭션 처리가 없는 경우)
-// 아래 Transactional 어노테이션을 사용하면 Spring에서 메서드 단위로 트랜잭션 처리를 하고,  만약 예외(unchecked) 발생시 자동 롤백처리 지원
+// 아래 Transactional 어노테이션을 사용하면 Spring에서 메서드 단위로 트랜잭션처리(commit)를 하고,  만약 예외(unchecked) 발생시 자동 롤백처리 지원
+// 트랜잭션의 시작/커밋/롤백 자동 처리
 @Transactional
 public class AuthorService {
 
@@ -48,11 +49,28 @@ public class AuthorService {
         if (authorRepository.findByEmail(authorCreateDto.getEmail()).isPresent()){
             throw new IllegalArgumentException("email already exists");
         }
+
         // Author author = new Author(authorCreateDto.getName(), authorCreateDto.getEmail(), authorCreateDto.getPassword());
        // toEntity패턴을 통해 Author 객체 조립을 공통화
-
         Author author = authorCreateDto.authorToEntity();
         this.authorRepository.save(author);
+
+        // cascading 테스트: 회원이 생성될 떄, 곧바로 "가입인사"글을 생성하는 상황
+        // 방법 2가지
+        // 방법 1. 직접 POST객체 생성 . 저장
+        Post post = Post.builder()
+                .title("안녕하세요")
+                .contents(authorCreateDto.getName() + "입니다. 방가방가")
+                // author 객체가 db에 save되는 순간 엔터티매니저와 영속성컨텍스트에 의해 author 객체에도 id값 생성
+                .author(author)
+                .delYn("N")
+                .build();
+        //postRepository.save(post);
+        // 방법 2. cascade 옵션 활용
+        author.getPostList().add(post);
+        this.authorRepository.save(author);
+
+
     }
     // 트랜잭션이 피료없는 경우, 아래와 같이 명시적으로 제외 (ex. 조회만 있는 경우)
     @Transactional(readOnly = true)
