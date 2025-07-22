@@ -1,16 +1,15 @@
 package com.beyond.basic.b2_bold.Author.service;
 
 import com.beyond.basic.b2_bold.Author.domain.Author;
-import com.beyond.basic.b2_bold.Author.dto.AuthorCreateDto;
-import com.beyond.basic.b2_bold.Author.dto.AuthorDetailDto;
-import com.beyond.basic.b2_bold.Author.dto.AuthorListDto;
-import com.beyond.basic.b2_bold.Author.dto.AuthorUpdatePwDto;
+import com.beyond.basic.b2_bold.Author.dto.*;
 //import com.beyond.basic.b2_bold.repository.AuthorJdbcRepository;
 //import com.beyond.basic.b2_bold.repository.AuthorMemoryRepository;
 import com.beyond.basic.b2_bold.Author.repository.AuthorRepository;
 import com.beyond.basic.b2_bold.Post.domain.Post;
 import com.beyond.basic.b2_bold.Post.repository.PostRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +40,7 @@ public class AuthorService {
     // 다형성 설계는 불가능
     private final AuthorRepository authorRepository;
     private final PostRepository postRepository;
+    private final PasswordEncoder passwordEncoder;
 
 
     // 객체조립은 서비스 담당
@@ -52,7 +52,8 @@ public class AuthorService {
 
         // Author author = new Author(authorCreateDto.getName(), authorCreateDto.getEmail(), authorCreateDto.getPassword());
        // toEntity패턴을 통해 Author 객체 조립을 공통화
-        Author author = authorCreateDto.authorToEntity();
+        String encodedPassword = passwordEncoder.encode(authorCreateDto.getPassword());
+        Author author = authorCreateDto.authorToEntity(encodedPassword);
         this.authorRepository.save(author);
 
         // cascading 테스트: 회원이 생성될 떄, 곧바로 "가입인사"글을 생성하는 상황
@@ -69,10 +70,29 @@ public class AuthorService {
         // 방법 2. cascade 옵션 활용
         author.getPostList().add(post);
         this.authorRepository.save(author);
+    }
+    // 로그인 서비스
 
+    public Author doLogin(AuthorLoginDto dto) {
+        //Author author = this.authorRepository.findByEmail(dto.getEmail()).orElseThrow(() -> new EntityNotFoundException("wrong email"));
+        Optional<Author> optionalAuthor = this.authorRepository.findByEmail(dto.getEmail());
+        boolean check = true;
+        if(!optionalAuthor.isPresent()) {
+            check = false;
+        } else {
+            // 비밀번호 일치여부 검증: matches함수를 통해서 암호되지 않은 값을 다시 암호화하여 db의 password를 검증
+            if(!passwordEncoder.matches(dto.getPassword(), optionalAuthor.get().getPassword())){
+                check = false;
+            }
+        }
+        if(!check) {
+            throw new IllegalArgumentException("email or password is wrong.");
+        }
+        return optionalAuthor.get();
 
     }
-    // 트랜잭션이 피료없는 경우, 아래와 같이 명시적으로 제외 (ex. 조회만 있는 경우)
+
+    // 트랜잭션이 필요없는 경우, 아래와 같이 명시적으로 제외 (ex. 조회만 있는 경우)
     @Transactional(readOnly = true)
     public List<AuthorListDto> findAll() {
         return authorRepository.findAll().stream().map(a -> AuthorListDto.listfromEntity(a)).toList();

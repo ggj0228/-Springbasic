@@ -1,13 +1,16 @@
 package com.beyond.basic.b2_bold.Author.controller;
 
+import com.beyond.basic.b2_bold.Author.domain.Author;
 import com.beyond.basic.b2_bold.Author.dto.*;
 import com.beyond.basic.b2_bold.Author.service.AuthorService;
 import com.beyond.basic.b2_bold.Common.CommonDto.CommonDto;
 import com.beyond.basic.b2_bold.Common.CommonDto.CommonErrorDto;
+import com.beyond.basic.b2_bold.Common.JwtTokenProvider;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -19,6 +22,7 @@ import java.util.*;
 public class AuthorController {
 
     private final AuthorService authorService;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     // 회원 가입
@@ -40,8 +44,19 @@ public class AuthorController {
         return new ResponseEntity<>("ok", HttpStatus.CREATED);
     }
 
+    // 회원 로그인 /author/doLogin
+    @PostMapping("/doLogin")
+    public ResponseEntity<?> doLogin(@Valid @RequestBody AuthorLoginDto authorLoginDto) {
+        this.authorService.doLogin(authorLoginDto);
+        Author author = authorService.doLogin(authorLoginDto);
+        // 토큰 생성 및 return
+        String token = jwtTokenProvider.createAtToken(author);
+        return new ResponseEntity<>(new CommonDto(token, HttpStatus.OK.value(), "token is created"), HttpStatus.OK);
+    }
+
     // 회원 목록 조회 :  /author/list
     @GetMapping("/list")
+    @PreAuthorize("hasRole('ADMIN')") // or를 사용해서 여러개 가능 and도 가능
     public List<AuthorListDto> findAll() {
         return this.authorService.findAll();
     }
@@ -50,6 +65,8 @@ public class AuthorController {
     // 서버에서 별도의 try catch를 하지 않으면, 에러 발생시 500에러 + 스프링 포맷으로 에러 리턴
 
     @GetMapping ("/detail/{id}")
+    // ADMIN권한이 있는지를 authentication 객체에서 쉽게 확인
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> findById(@PathVariable Long id) {
        try {
            return new ResponseEntity<>(new CommonDto(this.authorService.findById(id), HttpStatus.OK.value(), "author is found"), HttpStatus.OK);

@@ -22,15 +22,13 @@ public class AuthorCreateDto {
     @Size(min = 8, message = "비밀번호 길이가 8자리 이상이여야합니다.")
     private String password;
 
-    // 문자열로 값이 넘어오면 Role의 값으로 매핑됨
-    private Role role = Role.USER;
 
-    public Author authorToEntity () {
+    public Author authorToEntity (String encodedPassword) {
         return Author.builder()
                 .name(this.name)
                 .email(this.email)
-                .password(this.password)
-                .role(this.role)
+                .password(encodedPassword)
+                .role(Role.USER)
                 .build();
     }
 }

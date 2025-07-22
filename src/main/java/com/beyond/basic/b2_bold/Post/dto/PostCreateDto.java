@@ -18,8 +18,6 @@ public class PostCreateDto {
     @NotEmpty
     private String title;
     private String contents;
-    @NotNull // 숫자는 NotEmpty 사용불가
-    private Long authorId;
 
     public Post toEntity(Author author) {
         return Post.builder()
