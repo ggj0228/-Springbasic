@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -27,8 +28,20 @@ public class AuthorController {
 
     // 회원 가입
     @PostMapping("/create")
+    //dto에 있는 validation 어노테이션과 controller @Valid한쌍
+    /* 아래 코드 포스트맨 테스트 데이터 예시
+    1.multipart-formdata 선택
+    2.authorCreateDto를 text로 {"name": "testimg","email": "testimg@naver.com","password": "12345678"}
+    세팅하면 content-type을 application/json 설정
+    3.profileImage는 file로 세팅하면서 content-type을 multipart/form-data 설정
+     */
+
     // dto에 있는 validationn annotation과 controller에 @Valid 한쌍
-    public ResponseEntity<String> save(@Valid @RequestBody AuthorCreateDto authorCreateDto) {
+    public ResponseEntity<String> save(
+            @RequestPart(name = "authorCreateDto") @Valid  AuthorCreateDto authorCreateDto,
+            @RequestPart(name = "profileImage") MultipartFile profileImage
+            ){
+        System.out.println(profileImage.getOriginalFilename());
 //       try {
 //           authorService.save(authorCreateDto);
 //           return  new ResponseEntity<>("ok", HttpStatus.CREATED);
@@ -40,7 +53,7 @@ public class AuthorController {
 //   }
 
         //contorllerAdvice가 없었으면 위와 갗이 개별적인 예외처리가 필요하나, 이제는 전역적인 예외처리가 가능
-        this.authorService.save(authorCreateDto);
+        this.authorService.save(authorCreateDto, profileImage);
         return new ResponseEntity<>("ok", HttpStatus.CREATED);
     }
 
@@ -66,6 +79,7 @@ public class AuthorController {
 
     @GetMapping ("/detail/{id}")
     // ADMIN권한이 있는지를 authentication 객체에서 쉽게 확인
+    // 권한이 없을 경우 filterchain에서 에러가 터짐 -> EnableMethodSecurity어노테이션으로 연결됨
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> findById(@PathVariable Long id) {
        try {
@@ -74,6 +88,10 @@ public class AuthorController {
        }catch (NoSuchElementException e) {
            return new ResponseEntity<>(new CommonErrorDto(HttpStatus.NOT_FOUND.value(), e.getMessage()), HttpStatus.NOT_FOUND);
        }
+    }
+    @GetMapping("/myinfo")
+    public ResponseEntity<?> myInfo() {
+        return new ResponseEntity<>(new CommonDto(authorService.myInfo(), HttpStatus.OK.value(), "mypage"), HttpStatus.OK);
     }
     // 회원 비밀번호 수정 : author/udatepw   email, password -> json
     // get :조회, post : 등록, patch: 부분수정, put: 대체, delete: 삭제

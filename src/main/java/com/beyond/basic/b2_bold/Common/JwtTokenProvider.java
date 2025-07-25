@@ -22,7 +22,7 @@ public class JwtTokenProvider {
 
     private Key secret_at_key;
 
-    // Spring bean이 만들어지는 시점에 bean이 만들어진 직후 아래 메서드가 바로 실행
+    // Spring bean이 만들어지는 시점에 bean이 만들어진 직후 아래 메서드가 바로 실행 & Only one
     @PostConstruct
     public void init(){
         secret_at_key = new SecretKeySpec(java.util.Base64.getDecoder().decode(secretKeyAt), SignatureAlgorithm.HS512.getJcaName());

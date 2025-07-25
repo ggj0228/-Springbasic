@@ -2,4 +2,4 @@
 # 그래서 실행할 yml파일을 active로 설정을 한다
 spring :
   profiles:
-    active: local
+    active: prod

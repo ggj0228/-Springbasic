@@ -39,6 +39,8 @@ public class Author extends BaseTimeEntity   {
     @Builder.Default // 빌더패턴에서 변수 초기화(디폴트값)시 Builder.Default어노테이션 필수
     private Role role = Role.USER;
 
+    // 이미지 관련
+    private String profileImage;
     // OneToMany는 선택사항, 또한 default가 Lazy
     // mappedBy에는 ManyToOne 쪽의 변수명을 문자열로 지정. fk관리를 반대편(post) 쪽에서 관리한다는 의미 -> 연관관계주인(fk의 주인) 설정
     // Cascade : 부모객체의 변화에 따라 자식객체가 같이 변하는 옵션 1) persist: 저장 2) remove: 삭제
@@ -53,4 +55,9 @@ public class Author extends BaseTimeEntity   {
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
+    public void updateImageUrl(String profileImageUrl) {
+        this.profileImage = profileImageUrl;
+    }
+
 }
+

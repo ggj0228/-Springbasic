@@ -1,5 +1,6 @@
 package com.beyond.basic.b2_bold.Common;
 
+import com.beyond.basic.b2_bold.Common.CommonDto.JwtAuthorizationHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.ExceptionMappingAuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -28,6 +30,8 @@ public class SecurityConfig {
     // filter 계층에서 filter로직을 커스텀.
 
     private final JwtTokenFilter jwtTokenFilter;
+    private final JwtAuthenticationHandler jwtAuthenticationHandler;
+    private final JwtAuthorizationHandler jwtAuthorizationHandler;
     @Bean
     public SecurityFilterChain filterChain (HttpSecurity httpSecurity) throws Exception {
 
@@ -40,10 +44,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 // http basic은 email/pw를 인코딩하여 인증하는 방식으로 간단한 인증의경우에만 사용.
                 .httpBasic(AbstractHttpConfigurer::disable)
-                // 세션로그인 방식 비활성화
+                // 세션로그인 방식 비활성화 (세션은 상태가 full임 -> 서버가 가지고 있음)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // 이 단계에서 token을 검증하고,  token 검증을 통해 Autentication 객체를 생성하겠다
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(e
+                        -> e.authenticationEntryPoint(jwtAuthenticationHandler)     // 401에러의 경우(토큰의 잘못)
+                        .accessDeniedHandler(jwtAuthorizationHandler)              // 403에러의 경우(NO! 권한)
+
+                )
                 // 예외 api 정책 설정
                 // authenticated() : 예외를 제외한 모든 요청에 대해서 Authentication객체가 생성되기를 요구
                 .authorizeHttpRequests(a -> a.requestMatchers("/author/create", "/author/doLogin").permitAll().anyRequest().authenticated())
