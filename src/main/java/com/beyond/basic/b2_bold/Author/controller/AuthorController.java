@@ -39,7 +39,7 @@ public class AuthorController {
     // dto에 있는 validationn annotation과 controller에 @Valid 한쌍
     public ResponseEntity<String> save(
             @RequestPart(name = "authorCreateDto") @Valid  AuthorCreateDto authorCreateDto,
-            @RequestPart(name = "profileImage") MultipartFile profileImage
+            @RequestPart(name = "profileImage", required = false) MultipartFile profileImage
             ){
         System.out.println(profileImage.getOriginalFilename());
 //       try {

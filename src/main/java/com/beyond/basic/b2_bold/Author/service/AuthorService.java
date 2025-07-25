@@ -78,7 +78,7 @@ public class AuthorService {
         // checked에러 나오는데 service 계층에서 롤백되야하니 try catch해야함
         try {
             s3Client.putObject(putObjectRequest, RequestBody.fromBytes((profileImage.getBytes())));
-        } catch (IOException e) {
+        } catch (Exception e) {
             // checked를 unchecked로 바꿔서  전체 내용이 rollback되도록 예외처리
             throw new IllegalArgumentException("이미지 업로드 실패");
         }
