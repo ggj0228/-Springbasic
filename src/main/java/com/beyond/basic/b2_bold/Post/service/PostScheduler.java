@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Component
+@Component // 스프링이 시작되자마자 이 객체를 자동실행되게
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
